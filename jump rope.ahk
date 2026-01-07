@@ -29,6 +29,7 @@ missTimeout  := 1400
 
 toggle := false
 running := false
+logEnabled := false
 
 lastJump := 0
 lastSeen := 0
@@ -37,12 +38,6 @@ attempt := 0
 
 bubbleWasVisible := false
 armed := false
-
-; ---------------- LOG FILE ----------------
-logFile := A_ScriptDir . "\ff9_jump_log.txt"
-FormatTime, nowTime,, yyyy-MM-dd HH:mm:ss
-FileAppend, `n=== FF9 Jump Rope Session Started: %nowTime% ===`n, %logFile%
-; ------------------------------------------
 
 ; ---------------- OVERLAY ----------------
 Gui, Overlay:New, +AlwaysOnTop -Caption +ToolWindow +E0x20
@@ -61,6 +56,13 @@ if (running)
 
 toggle := true
 running := true
+; ---------------- LOG FILE ----------------
+if (logEnabled){
+	logFile := A_ScriptDir . "\ff9_jump_log.txt"
+	FormatTime, nowTime,, yyyy-MM-dd HH:mm:ss
+	FileAppend, `n=== FF9 Jump Rope Session Started: %nowTime% ===`n, %logFile%
+}
+; ------------------------------------------
 Gosub, StartSequence
 return
 
@@ -138,9 +140,10 @@ while (toggle)
         ; ---------- MISS ----------
         if (armed && (now - lastSeen > missTimeout))
         {
-            FormatTime, endTime,, yyyy-MM-dd HH:mm:ss
-            ;FileAppend, [%endTime%] Attempt %attempt% — %jumps% jumps`n, %logFile%
-
+			if (logEnabled){
+				FormatTime, endTime,, yyyy-MM-dd HH:mm:ss
+				FileAppend, [%endTime%] Attempt %attempt% — %jumps% jumps`n, %logFile%
+			}
             GuiControl, Overlay:, JumpText, Missed — Resetting
             armed := false
             Sleep, 300
